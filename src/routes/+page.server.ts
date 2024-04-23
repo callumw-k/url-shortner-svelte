@@ -10,7 +10,7 @@ export const actions = {
 			return fail(400, { url, incorrect: true });
 		}
 		console.debug(url);
-		const res = await fetch('http://localhost:8787/api/shorten', {
+		const res = await fetch('https://cwk.lol/api/shorten', {
 			headers: {
 				'Content-Type': 'application/json',
 				//add bearer token
