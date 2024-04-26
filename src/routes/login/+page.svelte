@@ -1,11 +1,8 @@
 <script>
-	import { buttonVariants } from "$lib/components/ui/button";
-	import { cn } from "$lib/utils";
-  import { SignIn } from "@auth/sveltekit/components";
+	import { Button } from '$lib/components/ui/button';
+	import { signIn } from '@auth/sveltekit/client';
 </script>
 
-<div class="flex justify-center mt-4 px-4">
-  <SignIn className={cn(buttonVariants({ variant: "default", size: "default", className: "" }))} provider="google" signInPage="login" >
-    <span slot="submitButton">Sign in</span>
-  </SignIn>
-</div> 
+<div class="mt-4 flex justify-center px-4">
+	<Button on:click={() => void signIn()}>Sign in</Button>
+</div>
