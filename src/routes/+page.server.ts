@@ -2,32 +2,57 @@ import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { SECRET_KEY } from '$env/static/private';
 
+const localUrl = 'http://localhost:3333';
+const prodUrl = 'https://cwk.lol';
+
 export const actions = {
 	default: async (event) => {
-		const data = await event.request.formData();
-		const url = data.get('url');
+		const formData = await event.request.formData();
+		const url = formData.get('url');
 		if (!url) {
 			return fail(400, { url, incorrect: true });
 		}
-		console.debug(url);
-		const res = await fetch('https://cwk.lol/api/shorten', {
+		const res = await fetch(`${prodUrl}/api/shorten`, {
 			headers: {
 				'Content-Type': 'application/json',
-				//add bearer token
 				Authorization: `Bearer ${SECRET_KEY}`
 			},
 			body: JSON.stringify({ url: url.toString() }),
 			method: 'post'
 		});
-		return await res.json();
+		const data = (await res.json()) as { url: string; shortUrl: string };
+		return { data };
 	}
 } satisfies Actions;
 
+const getPreviousLinks = async () => {
+	try {
+		const res = await fetch(`${localUrl}/api/recent/10`, {
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		const data = (await res.json()) as {
+			links: {
+				id: number;
+				url: string;
+				short: string;
+			}[];
+		};
+		return data;
+	} catch (e) {
+		return { links: [] };
+	}
+};
+
 export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
-	console.debug(session);
 	if (!session?.user?.email) {
 		return redirect(302, '/login');
 	}
-	return { session };
+
+	const previousLinks = (await getPreviousLinks()).links;
+
+	return { session, previousLinks };
 };
