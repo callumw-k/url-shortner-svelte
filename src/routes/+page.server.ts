@@ -27,7 +27,7 @@ export const actions = {
 
 const getPreviousLinks = async () => {
 	try {
-		const res = await fetch(`${localUrl}/api/recent/10`, {
+		const res = await fetch(`${prodUrl}/api/recent/10`, {
 			headers: {
 				'Content-Type': 'application/json'
 			}
