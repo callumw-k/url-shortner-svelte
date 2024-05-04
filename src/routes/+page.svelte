@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { enhance } from '$app/forms';
+	import { signOut } from '@auth/sveltekit/client';
 
 	let { data, form } = $props();
 	let links = data.previousLinks;
@@ -61,4 +62,5 @@
 			</div>
 		</div>
 	</div>
+	<Button onclick={() => void signOut()}>Sign out</Button>
 </main>
