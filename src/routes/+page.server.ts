@@ -1,33 +1,25 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { SECRET_KEY } from '$env/static/private';
-
-const localUrl = 'http://localhost:3333';
-const prodUrl = 'https://cwk.lol';
+import { postToApi } from '$lib/api-utils';
+import { z } from 'zod';
+import { PUBLIC_API_URL } from '$env/static/public';
 
 export const actions = {
 	default: async (event) => {
 		const formData = await event.request.formData();
 		const url = formData.get('url');
-		if (!url) {
+		const parsedUrl = z.string().url().safeParse(url);
+		if (!parsedUrl.success) {
 			return fail(400, { url, incorrect: true });
 		}
-		const res = await fetch(`${prodUrl}/api/shorten`, {
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${SECRET_KEY}`
-			},
-			body: JSON.stringify({ url: url.toString() }),
-			method: 'post'
-		});
-		const data = (await res.json()) as { url: string; shortUrl: string };
+		const data = await postToApi(parsedUrl.data.toString());
 		return { data };
 	}
 } satisfies Actions;
 
 const getPreviousLinks = async () => {
 	try {
-		const res = await fetch(`${prodUrl}/api/recent/10`, {
+		const res = await fetch(`${PUBLIC_API_URL}/api/recent/10`, {
 			headers: {
 				'Content-Type': 'application/json'
 			}
