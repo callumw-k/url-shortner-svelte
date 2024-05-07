@@ -17,12 +17,6 @@
 
 	let shortenedUrl = $state('');
 
-	$effect(() => {
-		if (form?.data?.shortUrl) {
-			shortenedUrl = `${baseShortnerUrl}/${form?.data?.shortUrl}`;
-		}
-	});
-
 	function onButtonClick() {
 		window.navigator.clipboard.writeText(createShortUrl(form?.data?.shortUrl ?? ''));
 	}
@@ -75,10 +69,9 @@
 	$effect(() => {
 		attemptShorten();
 	});
-
 	$effect(() => {
 		if (form?.data?.shortUrl) {
-			onButtonClick();
+			shortenedUrl = createShortUrl(form?.data?.shortUrl);
 		}
 	});
 </script>
