@@ -5,20 +5,15 @@
 	import { signOut } from '@auth/sveltekit/client';
 	import { z } from 'zod';
 	import { PUBLIC_API_URL } from '$env/static/public';
+	import LinkList from '$lib/components/link-list.svelte';
 
 	let { data, form } = $props();
 	let links = data.previousLinks;
 
-	let baseShortnerUrl = `${PUBLIC_API_URL}`;
-
-	function createShortUrl(pathname: string) {
-		return `${baseShortnerUrl}/${pathname}`;
-	}
-
 	let shortenedUrl = $state('');
 
 	function onButtonClick() {
-		window.navigator.clipboard.writeText(createShortUrl(form?.data?.shortUrl ?? ''));
+		window.navigator.clipboard.writeText(form?.data?.shortUrl ?? shortenedUrl);
 	}
 
 	const responseSchema = z.object({
@@ -47,11 +42,12 @@
 					'Content-Type': 'application/json'
 				}
 			});
+			console.debug(response);
 
 			const data = await response.json();
 			const parsedData = responseSchema.safeParse(data);
 			if (parsedData.success) {
-				let shortURl = createShortUrl(parsedData.data.shortUrl);
+				let shortURl = parsedData.data.shortUrl;
 				window.navigator.clipboard.writeText(shortURl);
 				shortenedUrl = shortURl;
 			}
@@ -71,14 +67,14 @@
 	});
 	$effect(() => {
 		if (form?.data?.shortUrl) {
-			shortenedUrl = createShortUrl(form?.data?.shortUrl);
+			shortenedUrl = form?.data?.shortUrl;
 		}
 	});
 </script>
 
 <svelte:window onfocus={attemptShorten} />
 
-<main class="mt-12 px-4">
+<main class="mt-12">
 	<div class="mx-auto flex max-w-lg justify-center">
 		<form use:enhance class="flex w-16 flex-1" method="post">
 			<div class="flex w-full space-x-4">
@@ -93,24 +89,8 @@
 			<Button on:click={onButtonClick}>Copy</Button>
 		</div>
 	{/if}
+	<LinkList {links} />
 
-	<div class="mt-8">
-		<div class="text-center">
-			<h2 class="text-xl">Previous links</h2>
-		</div>
-		<div class="mt-4 flex justify-center">
-			<div class="flex flex-col items-start">
-				{#each links as link}
-					<div class="flex space-x-2">
-						<p>{new URL(link.url).hostname}:</p>
-						<a class="underline" href={`${baseShortnerUrl}/${link.short}`}
-							>{baseShortnerUrl}/{link.short}</a
-						>
-					</div>
-				{/each}
-			</div>
-		</div>
-	</div>
 	<div class="mt-8 flex justify-center">
 		<Button onclick={() => void signOut()}>Sign out</Button>
 	</div>

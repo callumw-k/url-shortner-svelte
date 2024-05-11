@@ -30,6 +30,7 @@ const getPreviousLinks = async () => {
 				id: number;
 				url: string;
 				short: string;
+				shortUrl: string;
 			}[];
 		};
 		return data;
